@@ -1,5 +1,5 @@
+import { useRef } from 'react';
 import { Resolver, useForm } from 'react-hook-form';
-import AllTodosCards from './AllTodosCards';
 type FormValues = {
   todo: string;
 };
@@ -24,18 +24,29 @@ const resolver: Resolver<FormValues> = async (values) => {
   };
 };
 
-const TodoAddForm = () => {
+interface TodoAddFormProps {
+  todo: string;
+  setTodo: React.Dispatch<React.SetStateAction<string>>;
+  handleAddTodo: (e: React.FormEvent) => void;
+}
+
+const TodoAddForm: React.FC<TodoAddFormProps> = ({
+  todo,
+  setTodo,
+  handleAddTodo,
+}) => {
   const {
     register,
-    handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({ resolver });
-  // handle form submit
-  const onSubmit = handleSubmit((event) => console.log(event));
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <>
       <form
-        onSubmit={onSubmit}
+        onSubmit={(e) => {
+          handleAddTodo(e);
+          inputRef.current?.focus();
+        }}
         className='flex w-full items-start justify-center gap-5 md:w-2/3 xl:w-1/2'
       >
         <div>
@@ -44,6 +55,9 @@ const TodoAddForm = () => {
             type='text'
             name='todo'
             id='todo'
+            ref={inputRef}
+            value={todo}
+            onChange={(e) => setTodo?.(e.target.value)}
             placeholder='Today I will learn TypeScript'
             className={`w-full rounded border-none bg-slate-100 px-3 py-2 text-xl outline-none focus:border focus:border-slate-300`}
           />
@@ -58,7 +72,6 @@ const TodoAddForm = () => {
           Add
         </button>
       </form>
-      <AllTodosCards />
     </>
   );
 };
